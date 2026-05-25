@@ -1,0 +1,22 @@
+Inventory-management-system
+├─backend
+  ├──schema.sql
+│ ├── .env
+│ ├── .gitignore
+│ ├── package.json
+│ ├── package-lock.json
+│ ├── hash-password.js
+│ ├── server.js
+│ ├── /config
+│ │   └── db.js
+│ ├── /middleware
+│ │   └── auth.js
+│ └── /routes
+│     ├── productRoutes.js
+│     ├── supplierRoutes.js
+│     └── transactionRoutes.js
+│
+└── /frontend
+    ├── index.html
+    ├── style.css
+    └── script.js
