@@ -38,4 +38,4 @@ CREATE TABLE transactions (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 INSERT INTO users (name, email, password, role) 
-VALUES ('Admin', 'admin@stockflow.com', 'password123', 'Admin');
+VALUES ('Admin', 'admin@stockflow.com', '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC', 'Admin');
