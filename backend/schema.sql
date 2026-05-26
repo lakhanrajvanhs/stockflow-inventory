@@ -1,5 +1,6 @@
-CREATE DATABASE inven_db;
-USE inven_db;
+CREATE DATABASE defaultdb;
+
+USE defaultdb;
 
 CREATE TABLE suppliers (
     supplier_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -37,10 +38,6 @@ CREATE TABLE transactions (
     FOREIGN KEY (product_id) REFERENCES products(product_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
-INSERT INTO users (name, email, password, role) 
-VALUES ('Admin', 'admin@stockflow.com', '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC', 'Admin');
-
-
 -- 1. Insert Suppliers
 INSERT INTO suppliers (supplier_name, phone, address) VALUES 
 ('TechCorp Electronics', '9876543210', 'Mumbai, India'),
@@ -48,7 +45,7 @@ INSERT INTO suppliers (supplier_name, phone, address) VALUES
 
 -- 2. Insert Users (Assuming admin account already exists, add a staff member)
 INSERT INTO users (name, email, password, role) VALUES 
-('Inventory Staff', 'staff2@stockflow.com', '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC');
+('Admin', 'admin1@stockflow.com', '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC','Admin');
 
 -- 3. Insert Products
 -- (This links products to the suppliers created in step 1)
@@ -65,15 +62,9 @@ INSERT INTO transactions (product_id, user_id, transaction_type, quantity) VALUE
 (3, 1, 'IN', 100);
 
 
--- Update the Admin password
-UPDATE users 
-SET password = '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC' 
-WHERE email = 'admin@stockflow.com';
 
--- Update the Staff password (if you added one earlier)
-UPDATE users 
-SET password = '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC' 
-WHERE email = 'staff@stockflow.com';
+
+
 -- Check your new data
 SELECT * FROM suppliers;
 SELECT * FROM users;
