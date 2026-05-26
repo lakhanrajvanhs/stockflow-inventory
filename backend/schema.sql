@@ -39,3 +39,43 @@ CREATE TABLE transactions (
 );
 INSERT INTO users (name, email, password, role) 
 VALUES ('Admin', 'admin@stockflow.com', '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC', 'Admin');
+
+
+-- 1. Insert Suppliers
+INSERT INTO suppliers (supplier_name, phone, address) VALUES 
+('TechCorp Electronics', '9876543210', 'Mumbai, India'),
+('Office Needs Ltd', '9123456789', 'Bangalore, India');
+
+-- 2. Insert Users (Assuming admin account already exists, add a staff member)
+INSERT INTO users (name, email, password, role) VALUES 
+('Inventory Staff', 'staff2@stockflow.com', '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC');
+
+-- 3. Insert Products
+-- (This links products to the suppliers created in step 1)
+INSERT INTO products (product_name, category, quantity, price, reorder_level, supplier_id) VALUES 
+('Laptop', 'Electronics', 50, 45000.00, 10, 1),
+('Office Chair', 'Furniture', 20, 5500.00, 5, 2),
+('Wireless Mouse', 'Electronics', 100, 800.00, 20, 1);
+
+-- 4. Insert Transactions
+-- (This links transactions to the products and users created above)
+INSERT INTO transactions (product_id, user_id, transaction_type, quantity) VALUES 
+(1, 1, 'IN', 50),
+(2, 1, 'IN', 20),
+(3, 1, 'IN', 100);
+
+
+-- Update the Admin password
+UPDATE users 
+SET password = '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC' 
+WHERE email = 'admin@stockflow.com';
+
+-- Update the Staff password (if you added one earlier)
+UPDATE users 
+SET password = '$2b$10$qc9ljEbgvDFhPWyUoJgrR.n8wxVj9EtqKUp3Yv21Cd9.THzv6mrUC' 
+WHERE email = 'staff@stockflow.com';
+-- Check your new data
+SELECT * FROM suppliers;
+SELECT * FROM users;
+SELECT * FROM products;
+SELECT * FROM transactions;
