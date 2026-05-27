@@ -666,19 +666,136 @@ window.closeEditProduct  = closeEditProduct;
 window.openEditSupplier  = openEditSupplier;
 window.closeEditSupplier = closeEditSupplier;
 
-// ─── Init: Restore session ─────────────────────────────────────────────────────
-const savedToken = getToken();
-const savedUser  = getSavedUser();
+// ─── Auth Form Handler ─────────────────────────────────────────────────────────
+const authForm       = document.getElementById('authForm');
+const authTitle      = document.getElementById('authTitle');
+const authEmail      = document.getElementById('authEmail');
+const authPassword   = document.getElementById('authPassword');
+const authName       = document.getElementById('authName');
+const authRole       = document.getElementById('authRole');
+const authMessage    = document.getElementById('authMessage');
+const authSubmitBtn  = document.getElementById('authSubmitBtn');
+const authSwitchBtn  = document.getElementById('authSwitchBtn');
+const authSwitchText = document.getElementById('authSwitchText');
+const signupNameField = document.getElementById('signupNameField');
+const signupRoleField = document.getElementById('signupRoleField');
+const loginScreen    = document.getElementById('loginScreen');
+const appDashboard   = document.getElementById('appDashboard');
 
-if (savedToken && savedUser) {
-  currentUser = savedUser;
-  updateActiveUserUI(savedUser);
-  const loginScreen  = document.getElementById('loginScreen');
-  const appDashboard = document.getElementById('appDashboard');
+let authMode = 'login';
+
+function setAuthMode(mode) {
+  authMode = mode;
+  if (authMessage) { authMessage.style.display = 'none'; authMessage.textContent = ''; }
+  if (mode === 'login') {
+    if (authTitle)      authTitle.textContent      = 'Login to StockFlow';
+    if (authSubmitBtn)  authSubmitBtn.textContent  = 'Login';
+    if (authSwitchText) authSwitchText.textContent = "Don't have an account?";
+    if (authSwitchBtn)  authSwitchBtn.textContent  = 'Sign up';
+    if (signupNameField) signupNameField.style.display = 'none';
+    if (signupRoleField) signupRoleField.style.display = 'none';
+  } else {
+    if (authTitle)      authTitle.textContent      = 'Create New Account';
+    if (authSubmitBtn)  authSubmitBtn.textContent  = 'Sign Up';
+    if (authSwitchText) authSwitchText.textContent = 'Already have an account?';
+    if (authSwitchBtn)  authSwitchBtn.textContent  = 'Login';
+    if (signupNameField) signupNameField.style.display = 'block';
+    if (signupRoleField) signupRoleField.style.display = 'block';
+  }
+}
+
+function showAppDashboard(user) {
+  currentUser = user;
+  saveUser(user);
+  updateActiveUserUI(user);
   if (loginScreen)   loginScreen.style.display  = 'none';
   if (appDashboard)  appDashboard.style.display = '';
   showView('dashboard');
   loadDashboard();
   loadReports();
 }
-// If no session → index.html inline script shows loginScreen by default
+
+if (authSwitchBtn) {
+  authSwitchBtn.addEventListener('click', () => {
+    setAuthMode(authMode === 'login' ? 'signup' : 'login');
+  });
+}
+
+if (authForm) {
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (authMessage) authMessage.style.display = 'none';
+    if (authSubmitBtn) { authSubmitBtn.disabled = true; authSubmitBtn.textContent = authMode === 'login' ? 'Logging in...' : 'Creating account...'; }
+
+    try {
+      if (authMode === 'login') {
+        const res  = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email:    authEmail.value.trim(),
+            password: authPassword.value
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          saveToken(data.token);
+          showAppDashboard(data.user);
+        } else {
+          if (authMessage) {
+            authMessage.textContent   = data.message || 'Invalid credentials';
+            authMessage.style.display = 'block';
+            authMessage.style.color   = '#e53e3e';
+          }
+        }
+      } else {
+        const res  = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name:     authName.value.trim(),
+            email:    authEmail.value.trim(),
+            password: authPassword.value,
+            role:     authRole.value
+          })
+        });
+        const data = await res.json();
+
+        if (authMessage) {
+          authMessage.textContent   = data.message || (data.success ? 'Account created!' : 'Signup failed');
+          authMessage.style.display = 'block';
+          authMessage.style.color   = data.success ? '#38a169' : '#e53e3e';
+        }
+        if (data.success) {
+          setTimeout(() => {
+            setAuthMode('login');
+            if (authEmail) authEmail.value = authEmail.value;
+          }, 1000);
+        }
+      }
+    } catch (err) {
+      if (authMessage) {
+        authMessage.textContent   = 'Network error. Please try again.';
+        authMessage.style.display = 'block';
+        authMessage.style.color   = '#e53e3e';
+      }
+    } finally {
+      if (authSubmitBtn) {
+        authSubmitBtn.disabled    = false;
+        authSubmitBtn.textContent = authMode === 'login' ? 'Login' : 'Sign Up';
+      }
+    }
+  });
+}
+
+// ─── Init: Restore session ─────────────────────────────────────────────────────
+const savedToken = getToken();
+const savedUser  = getSavedUser();
+
+if (savedToken && savedUser) {
+  showAppDashboard(savedUser);
+} else {
+  if (loginScreen)  loginScreen.style.display  = 'flex';
+  if (appDashboard) appDashboard.style.display = 'none';
+}

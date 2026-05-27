@@ -11,7 +11,6 @@
   <a class="sr-only" href="#main">Skip to content</a>
   <div class="mobile-overlay" id="overlay"></div>
 
-  <!-- ===================== AUTH SCREEN ===================== -->
   <div
     id="loginScreen"
     style="
@@ -32,7 +31,6 @@
     >
       <h2 id="authTitle" style="margin-bottom: 1rem;">Login to StockFlow</h2>
 
-      <!-- Only shown on Signup -->
       <div class="field" id="signupNameField" style="display: none;">
         <label for="authName">Full Name</label>
         <input type="text" id="authName" placeholder="Enter your full name">
@@ -48,7 +46,6 @@
         <input type="password" id="authPassword" required placeholder="••••••••">
       </div>
 
-      <!-- Only shown on Signup -->
       <div class="field" id="signupRoleField" style="margin-top: 1rem; display: none;">
         <label for="authRole">Role</label>
         <select id="authRole">
@@ -81,7 +78,6 @@
     </form>
   </div>
 
-  <!-- ===================== MAIN DASHBOARD (hidden until login) ===================== -->
   <div class="dashboard" id="appDashboard" style="display: none;">
     <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
       <div class="brand">
@@ -129,14 +125,12 @@
       <div class="header-actions">
         <button class="theme-toggle" data-theme-toggle aria-label="Switch theme">◐</button>
 
-        <!-- Shows logged-in user initials -->
         <button id="userSwitcherBtn" class="avatar" type="button" title="Logged in user">
           <span id="userInitials">?</span>
         </button>
 
         <span id="activeUserLabel" class="tiny">Guest</span>
 
-        <!-- LOGOUT BUTTON -->
         <button
           id="logoutBtn"
           class="btn"
@@ -150,7 +144,6 @@
 
     <main class="main" id="main">
 
-      <!-- VIEW: DASHBOARD -->
       <div id="view-dashboard" class="view-section">
         <section class="metrics">
           <article class="panel metric-card"><div class="label">Inventory value</div><div class="value" id="inventoryValue">₹0</div></article>
@@ -160,7 +153,6 @@
         </section>
       </div>
 
-      <!-- VIEW: PRODUCTS -->
       <div id="view-products" class="view-section" style="display: none;">
         <section class="content-grid">
           <article class="panel">
@@ -181,7 +173,6 @@
             </div>
           </article>
 
-          <!-- Add / Edit Product Form -->
           <aside class="panel">
             <div class="card-head"><h3 id="productFormTitle">Add product</h3></div>
             <form class="form" id="productForm">
@@ -194,7 +185,6 @@
               </div>
               <div class="form-row">
                 <div class="field"><label>Reorder level</label><input id="reorder_level" type="number" required /></div>
-                <!-- SUPPLIER DROPDOWN instead of raw text input -->
                 <div class="field">
                   <label>Supplier</label>
                   <select id="supplier_id" required>
@@ -211,7 +201,6 @@
         </section>
       </div>
 
-      <!-- VIEW: SUPPLIERS -->
       <div id="view-suppliers" class="view-section" style="display: none;">
         <section class="content-grid">
           <aside class="panel">
@@ -219,7 +208,6 @@
             <div class="list" id="supplierList"></div>
           </aside>
 
-          <!-- Add / Edit Supplier Form -->
           <aside class="panel">
             <div class="card-head"><h3 id="supplierFormTitle">Add Supplier</h3></div>
             <form class="form" id="supplierForm">
@@ -245,7 +233,6 @@
         </section>
       </div>
 
-      <!-- VIEW: TRANSACTIONS -->
       <div id="view-transactions" class="view-section" style="display: none;">
         <section class="content-grid">
           <aside class="panel">
@@ -255,7 +242,6 @@
             </div>
 
             <form class="form" id="transactionForm">
-              <!-- PRODUCT DROPDOWN instead of raw text input -->
               <div class="field">
                 <label for="transactionProductId">Product</label>
                 <select id="transactionProductId" required>
@@ -263,7 +249,6 @@
                 </select>
               </div>
 
-              <!-- Auto-filled from logged-in user, hidden -->
               <input type="hidden" id="transactionUserId" />
 
               <div class="field">
@@ -313,7 +298,6 @@
         </section>
       </div>
 
-      <!-- VIEW: REPORTS -->
       <div id="view-reports" class="view-section" style="display: none;">
         <section class="content-grid">
           <article class="panel">
@@ -373,7 +357,6 @@
     </main>
   </div>
 
-  <!-- Delete Confirmation Modal -->
   <div id="deleteModal" style="
     display: none;
     position: fixed;
@@ -395,186 +378,5 @@
 
   <script src="script.js?v=3"></script>
 
-  <script>
-    // ===================== AUTH LOGIC =====================
-
-    const loginScreen = document.getElementById('loginScreen');
-    const appDashboard = document.getElementById('appDashboard');
-    const authForm = document.getElementById('authForm');
-    const authTitle = document.getElementById('authTitle');
-    const authSubmitBtn = document.getElementById('authSubmitBtn');
-    const authSwitchBtn = document.getElementById('authSwitchBtn');
-    const authSwitchText = document.getElementById('authSwitchText');
-    const authMessage = document.getElementById('authMessage');
-    const signupNameField = document.getElementById('signupNameField');
-    const signupRoleField = document.getElementById('signupRoleField');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    let isLoginMode = true;
-
-    // Toggle between Login and Signup
-    authSwitchBtn.addEventListener('click', () => {
-      isLoginMode = !isLoginMode;
-      if (isLoginMode) {
-        authTitle.textContent = 'Login to StockFlow';
-        authSubmitBtn.textContent = 'Login';
-        authSwitchText.textContent = "Don't have an account?";
-        authSwitchBtn.textContent = 'Sign up';
-        signupNameField.style.display = 'none';
-        signupRoleField.style.display = 'none';
-      } else {
-        authTitle.textContent = 'Create New Account';
-        authSubmitBtn.textContent = 'Sign Up';
-        authSwitchText.textContent = 'Already have an account?';
-        authSwitchBtn.textContent = 'Login';
-        signupNameField.style.display = 'block';
-        signupRoleField.style.display = 'block';
-      }
-      authMessage.style.display = 'none';
-    });
-
-    // Show auth message
-    function showAuthMsg(msg, isError = true) {
-      authMessage.textContent = msg;
-      authMessage.style.display = 'block';
-      authMessage.style.color = isError ? 'var(--color-danger, #e53e3e)' : 'var(--color-success, #38a169)';
-    }
-
-    // Auth headers helper — used throughout script.js too via window
-    window.authHeaders = function() {
-      return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      };
-    };
-
-    // Show dashboard after login
-    function showDashboard(user) {
-      loginScreen.style.display = 'none';
-      appDashboard.style.display = '';
-
-      // Set user info in header
-      const initials = user.name
-        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-        : '?';
-      document.getElementById('userInitials').textContent = initials;
-      document.getElementById('activeUserLabel').textContent = user.name || 'User';
-
-      // Auto-fill user ID in transaction form
-      document.getElementById('transactionUserId').value = user.id;
-
-      // If Staff, hide add/edit/delete UI (role-based access)
-      if (user.role === 'Staff') {
-        document.querySelectorAll('#productForm, #supplierForm, #transactionForm').forEach(f => {
-          const btn = f.querySelector('button[type="submit"]');
-          if (btn) btn.style.opacity = '0.4';
-          // You can fully hide forms for staff if preferred
-        });
-      }
-    }
-
-    // On page load — check token
-    window.addEventListener('DOMContentLoaded', () => {
-      const token = localStorage.getItem('sf_token');
-      const user = JSON.parse(localStorage.getItem('sf_user') || 'null');
-      if (token && user) {
-        showDashboard(user);
-      }
-      // loginScreen stays visible if not logged in
-    });
-
-    // Handle Login / Signup submit
-    authForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      authMessage.style.display = 'none';
-      authSubmitBtn.disabled = true;
-      authSubmitBtn.textContent = isLoginMode ? 'Logging in...' : 'Creating account...';
-
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value;
-
-      try {
-        if (isLoginMode) {
-          // LOGIN
-          const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-          });
-          const data = await res.json();
-
-          if (data.success) {
-            localStorage.setItem('sf_token', data.token);
-            localStorage.setItem('sf_user', JSON.stringify(data.user));
-            showDashboard(data.user);
-            if (typeof window.onLoginSuccess === 'function') window.onLoginSuccess(data.user);
-          } else {
-            showAuthMsg(data.message || 'Invalid credentials');
-          }
-        } else {
-          // SIGNUP
-          const name = document.getElementById('authName').value.trim();
-          const role = document.getElementById('authRole').value;
-
-          const res = await fetch('/api/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password, role })
-          });
-          const data = await res.json();
-
-          if (data.success) {
-            showAuthMsg('Account created! Please log in.', false);
-            // Switch to login mode
-            setTimeout(() => {
-              authSwitchBtn.click();
-              document.getElementById('authEmail').value = email;
-            }, 1000);
-          } else {
-            showAuthMsg(data.message || 'Signup failed');
-          }
-        }
-      } catch (err) {
-        showAuthMsg('Network error. Please try again.');
-      } finally {
-        authSubmitBtn.disabled = false;
-        authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
-      }
-    });
-
-    // LOGOUT
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('sf_token');
-      localStorage.removeItem('sf_user');
-      appDashboard.style.display = 'none';
-      loginScreen.style.display = 'flex';
-      document.getElementById('authEmail').value = '';
-      document.getElementById('authPassword').value = '';
-      authMessage.style.display = 'none';
-      isLoginMode = true;
-      authTitle.textContent = 'Login to StockFlow';
-      authSubmitBtn.textContent = 'Login';
-      authSwitchText.textContent = "Don't have an account?";
-      authSwitchBtn.textContent = 'Sign up';
-      signupNameField.style.display = 'none';
-      signupRoleField.style.display = 'none';
-    });
-
-    // ===================== DELETE CONFIRMATION MODAL =====================
-    window.showDeleteConfirm = function(title, message, onConfirm) {
-      const modal = document.getElementById('deleteModal');
-      document.getElementById('deleteModalTitle').textContent = title;
-      document.getElementById('deleteModalMsg').textContent = message;
-      modal.style.display = 'flex';
-
-      const confirmBtn = document.getElementById('deleteConfirmBtn');
-      const cancelBtn = document.getElementById('deleteCancelBtn');
-
-      const cleanup = () => { modal.style.display = 'none'; };
-
-      confirmBtn.onclick = () => { cleanup(); onConfirm(); };
-      cancelBtn.onclick = cleanup;
-    };
-  </script>
 </body>
 </html>
