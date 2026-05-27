@@ -11,7 +11,78 @@
   <a class="sr-only" href="#main">Skip to content</a>
   <div class="mobile-overlay" id="overlay"></div>
 
-  <div class="dashboard">
+  <!-- ===================== AUTH SCREEN ===================== -->
+  <div
+    id="loginScreen"
+    style="
+      position: fixed;
+      inset: 0;
+      background: var(--color-bg);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    "
+  >
+    <form
+      id="authForm"
+      class="panel"
+      style="padding: 2rem; width: 100%; max-width: 420px;"
+    >
+      <h2 id="authTitle" style="margin-bottom: 1rem;">Login to StockFlow</h2>
+
+      <!-- Only shown on Signup -->
+      <div class="field" id="signupNameField" style="display: none;">
+        <label for="authName">Full Name</label>
+        <input type="text" id="authName" placeholder="Enter your full name">
+      </div>
+
+      <div class="field" style="margin-top: 1rem;">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" required placeholder="you@stockflow.com">
+      </div>
+
+      <div class="field" style="margin-top: 1rem;">
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" required placeholder="••••••••">
+      </div>
+
+      <!-- Only shown on Signup -->
+      <div class="field" id="signupRoleField" style="margin-top: 1rem; display: none;">
+        <label for="authRole">Role</label>
+        <select id="authRole">
+          <option value="Staff">Staff</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+
+      <p id="authMessage" style="margin-top: 0.75rem; display: none; color: var(--color-danger, #e53e3e);"></p>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        id="authSubmitBtn"
+        style="width: 100%; margin-top: 1.5rem;"
+      >
+        Login
+      </button>
+
+      <p style="margin-top: 1rem; text-align: center;">
+        <span id="authSwitchText">Don't have an account?</span>
+        <button
+          type="button"
+          id="authSwitchBtn"
+          style="background: none; border: none; color: var(--color-primary); cursor: pointer;"
+        >
+          Sign up
+        </button>
+      </p>
+    </form>
+  </div>
+
+  <!-- ===================== MAIN DASHBOARD (hidden until login) ===================== -->
+  <div class="dashboard" id="appDashboard" style="display: none;">
     <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
@@ -33,19 +104,13 @@
       <section class="nav-section">
         <div class="nav-title">Workspace</div>
         <div class="nav-list">
-          <button class="nav-btn active">Dashboard</button>
-          <button class="nav-btn">Products</button>
-          <button class="nav-btn">Suppliers</button>
-          <button class="nav-btn">Transactions</button>
-          <button class="nav-btn">Reports</button>
+          <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+          <button class="nav-btn" data-view="products">Products</button>
+          <button class="nav-btn" data-view="suppliers">Suppliers</button>
+          <button class="nav-btn" data-view="transactions">Transactions</button>
+          <button class="nav-btn" data-view="reports">Reports</button>
         </div>
       </section>
-
-      <!-- <section class="panel sidebar-card">
-        <div class="nav-title accent">Today</div>
-        <strong>5 items need reorder</strong>
-        <p class="muted">Focus on keyboards, SSD drives, HDMI hubs, barcode labels, and printer ink.</p>
-      </section> -->
     </aside>
 
     <header class="header">
@@ -61,301 +126,455 @@
         <input type="text" id="searchInput" placeholder="Search product or supplier" />
       </div>
 
-      
       <div class="header-actions">
         <button class="theme-toggle" data-theme-toggle aria-label="Switch theme">◐</button>
 
-        <button id="userSwitcherBtn" class="avatar" type="button" title="Switch user">
-          RL
+        <!-- Shows logged-in user initials -->
+        <button id="userSwitcherBtn" class="avatar" type="button" title="Logged in user">
+          <span id="userInitials">?</span>
         </button>
 
         <span id="activeUserLabel" class="tiny">Guest</span>
+
+        <!-- LOGOUT BUTTON -->
+        <button
+          id="logoutBtn"
+          class="btn"
+          style="margin-left: 0.5rem; font-size: 0.8rem; padding: 0.3rem 0.8rem; background: var(--color-danger, #e53e3e); color: #fff; border: none; border-radius: 6px; cursor: pointer;"
+          title="Logout"
+        >
+          Logout
+        </button>
       </div>
-
-      <!-- Auth Screen -->
-<div
-  id="loginScreen"
-  style="
-    position: fixed;
-    inset: 0;
-    background: var(--color-bg);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  "
->
-  <form
-    id="authForm"
-    class="panel"
-    style="padding: 2rem; width: 100%; max-width: 420px;"
-  >
-    <h2 id="authTitle" style="margin-bottom: 1rem;">Login to StockFlow</h2>
-
-    <div class="field" id="signupNameField" style="display: none;">
-      <label for="authName">Full Name</label>
-      <input type="text" id="authName" placeholder="Enter your full name">
-    </div>
-
-    <div class="field" style="margin-top: 1rem;">
-      <label for="authEmail">Email</label>
-      <input type="email" id="authEmail" value="admin@stockflow.com" required>
-    </div>
-
-    <div class="field" style="margin-top: 1rem;">
-      <label for="authPassword">Password</label>
-      <input type="password" id="authPassword" value="password123" required>
-    </div>
-
-    <div class="field" id="signupRoleField" style="margin-top: 1rem; display: none;">
-      <label for="authRole">Role</label>
-      <select id="authRole">
-        <option value="Staff">Staff</option>
-        <option value="Admin">Admin</option>
-      </select>
-    </div>
-
-    <p id="authMessage" style="margin-top: 0.75rem; display: none;"></p>
-
-    <button
-      type="submit"
-      class="btn btn-primary"
-      id="authSubmitBtn"
-      style="width: 100%; margin-top: 1.5rem;"
-    >
-      Login
-    </button>
-
-    <p style="margin-top: 1rem; text-align: center;">
-      <span id="authSwitchText">Don't have an account?</span>
-      <button
-        type="button"
-        id="authSwitchBtn"
-        style="background: none; border: none; color: var(--color-primary); cursor: pointer;"
-      >
-        Sign up
-      </button>
-    </p>
-  </form>
-</div>
     </header>
 
     <main class="main" id="main">
-  
-  <!-- VIEW: DASHBOARD -->
-  <div id="view-dashboard" class="view-section">
-    <section class="metrics">
-      <article class="panel metric-card"><div class="label">Inventory value</div><div class="value" id="inventoryValue">₹0</div></article>
-      <article class="panel metric-card"><div class="label">Products count</div><div class="value" id="productCount">0</div></article>
-      <article class="panel metric-card"><div class="label">Low stock items</div><div class="value" id="lowStockCount">0</div></article>
-      <article class="panel metric-card"><div class="label">Suppliers count</div><div class="value" id="supplierCount">0</div></article>
-    </section>
+
+      <!-- VIEW: DASHBOARD -->
+      <div id="view-dashboard" class="view-section">
+        <section class="metrics">
+          <article class="panel metric-card"><div class="label">Inventory value</div><div class="value" id="inventoryValue">₹0</div></article>
+          <article class="panel metric-card"><div class="label">Products count</div><div class="value" id="productCount">0</div></article>
+          <article class="panel metric-card"><div class="label">Low stock items</div><div class="value" id="lowStockCount">0</div></article>
+          <article class="panel metric-card"><div class="label">Suppliers count</div><div class="value" id="supplierCount">0</div></article>
+        </section>
+      </div>
+
+      <!-- VIEW: PRODUCTS -->
+      <div id="view-products" class="view-section" style="display: none;">
+        <section class="content-grid">
+          <article class="panel">
+            <div class="card-head"><h3>Products table</h3></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr>
+                  <th>ID</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr></thead>
+                <tbody id="productTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- Add / Edit Product Form -->
+          <aside class="panel">
+            <div class="card-head"><h3 id="productFormTitle">Add product</h3></div>
+            <form class="form" id="productForm">
+              <input type="hidden" id="edit_product_id" />
+              <div class="field"><label>Product name</label><input id="product_name" required /></div>
+              <div class="field"><label>Category</label><input id="category" required /></div>
+              <div class="form-row">
+                <div class="field"><label>Quantity</label><input id="quantity" type="number" required /></div>
+                <div class="field"><label>Price</label><input id="price" type="number" step="0.01" required /></div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label>Reorder level</label><input id="reorder_level" type="number" required /></div>
+                <!-- SUPPLIER DROPDOWN instead of raw text input -->
+                <div class="field">
+                  <label>Supplier</label>
+                  <select id="supplier_id" required>
+                    <option value="">-- Select Supplier --</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:flex; gap: 0.5rem; margin-top: 0.5rem;">
+                <button class="btn btn-primary" type="submit" id="productSaveBtn">Save product</button>
+                <button class="btn" type="button" id="productCancelBtn" style="display:none;">Cancel</button>
+              </div>
+            </form>
+          </aside>
+        </section>
+      </div>
+
+      <!-- VIEW: SUPPLIERS -->
+      <div id="view-suppliers" class="view-section" style="display: none;">
+        <section class="content-grid">
+          <aside class="panel">
+            <div class="card-head"><h3>Suppliers List</h3></div>
+            <div class="list" id="supplierList"></div>
+          </aside>
+
+          <!-- Add / Edit Supplier Form -->
+          <aside class="panel">
+            <div class="card-head"><h3 id="supplierFormTitle">Add Supplier</h3></div>
+            <form class="form" id="supplierForm">
+              <input type="hidden" id="edit_supplier_id" />
+              <div class="field">
+                <label>Supplier Name</label>
+                <input id="supplier_name" required placeholder="Tech Supplies Inc" />
+              </div>
+              <div class="field">
+                <label>Phone</label>
+                <input id="supplier_phone" required placeholder="9876543210" />
+              </div>
+              <div class="field">
+                <label>Address</label>
+                <input id="supplier_address" required placeholder="Jaipur, Rajasthan" />
+              </div>
+              <div style="display:flex; gap: 0.5rem; margin-top: 1rem;">
+                <button class="btn btn-primary" type="submit" id="supplierSaveBtn">Save Supplier</button>
+                <button class="btn" type="button" id="supplierCancelBtn" style="display:none;">Cancel</button>
+              </div>
+            </form>
+          </aside>
+        </section>
+      </div>
+
+      <!-- VIEW: TRANSACTIONS -->
+      <div id="view-transactions" class="view-section" style="display: none;">
+        <section class="content-grid">
+          <aside class="panel">
+            <div class="card-head">
+              <h3>Add transaction</h3>
+              <p class="muted">Record stock in, out, or return.</p>
+            </div>
+
+            <form class="form" id="transactionForm">
+              <!-- PRODUCT DROPDOWN instead of raw text input -->
+              <div class="field">
+                <label for="transactionProductId">Product</label>
+                <select id="transactionProductId" required>
+                  <option value="">-- Select Product --</option>
+                </select>
+              </div>
+
+              <!-- Auto-filled from logged-in user, hidden -->
+              <input type="hidden" id="transactionUserId" />
+
+              <div class="field">
+                <label for="transactionType">Transaction Type</label>
+                <select id="transactionType" required>
+                  <option value="IN">IN</option>
+                  <option value="OUT">OUT</option>
+                  <option value="RETURN">RETURN</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="transactionQuantity">Quantity</label>
+                <input id="transactionQuantity" type="number" min="1" required placeholder="5" />
+              </div>
+
+              <button class="btn btn-primary" type="submit">Save transaction</button>
+            </form>
+          </aside>
+
+          <article class="panel">
+            <div class="card-head">
+              <h3>Transaction history</h3>
+              <p class="muted">Latest inventory movements</p>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionTableBody">
+                  <tr>
+                    <td colspan="6" class="empty-cell">No transactions found.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <!-- VIEW: REPORTS -->
+      <div id="view-reports" class="view-section" style="display: none;">
+        <section class="content-grid">
+          <article class="panel">
+            <div class="card-head">
+              <h3>Summary report</h3>
+              <p class="muted">Live numbers from products, suppliers, and transactions</p>
+            </div>
+
+            <div class="metrics">
+              <article class="panel metric-card">
+                <div class="label">Total products</div>
+                <div class="value" id="reportTotalProducts">0</div>
+              </article>
+              <article class="panel metric-card">
+                <div class="label">Total suppliers</div>
+                <div class="value" id="reportTotalSuppliers">0</div>
+              </article>
+              <article class="panel metric-card">
+                <div class="label">Total transactions</div>
+                <div class="value" id="reportTotalTransactions">0</div>
+              </article>
+              <article class="panel metric-card">
+                <div class="label">Inventory value</div>
+                <div class="value" id="reportInventoryValue">₹0</div>
+              </article>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="card-head">
+              <h3>Low stock report</h3>
+              <p class="muted">Products at or below reorder level</p>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Reorder Level</th>
+                  </tr>
+                </thead>
+                <tbody id="reportLowStockBody">
+                  <tr>
+                    <td colspan="5" class="empty-cell">No low stock items.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </div>
+
+    </main>
   </div>
 
-  <!-- VIEW: PRODUCTS -->
-  <div id="view-products" class="view-section" style="display: none;">
-    <section class="content-grid">
-      <article class="panel">
-        <div class="card-head"><h3>Products table</h3></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>ID</th>
-              <th>Product</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr></thead>
-            <tbody id="productTableBody"></tbody>
-          </table>
-        </div>
-      </article>
-      
-      <!-- Existing Product Form goes here -->
-      <aside class="panel">
-        <div class="card-head"><h3>Add product</h3></div>
-        <form class="form" id="productForm">
-          <div class="field"><label>Product name</label><input id="product_name" required /></div>
-          <div class="field"><label>Category</label><input id="category" required /></div>
-          <div class="form-row">
-            <div class="field"><label>Quantity</label><input id="quantity" type="number" required /></div>
-            <div class="field"><label>Price</label><input id="price" type="number" step="0.01" required /></div>
-          </div>
-          <div class="form-row">
-            <div class="field"><label>Reorder level</label><input id="reorder_level" type="number" required /></div>
-            <div class="field"><label>Supplier ID</label><input id="supplier_id" type="number" required /></div>
-          </div>
-          <button class="btn btn-primary" type="submit">Save product</button>
-        </form>
-      </aside>
-    </section>
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+    align-items: center;
+    justify-content: center;
+  ">
+    <div class="panel" style="padding: 2rem; max-width: 380px; width: 90%; text-align: center;">
+      <h3 id="deleteModalTitle" style="margin-bottom: 0.5rem;">Confirm Delete</h3>
+      <p id="deleteModalMsg" class="muted" style="margin-bottom: 1.5rem;">Are you sure you want to delete this item? This cannot be undone.</p>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button id="deleteConfirmBtn" class="btn btn-primary" style="background: var(--color-danger, #e53e3e);">Delete</button>
+        <button id="deleteCancelBtn" class="btn">Cancel</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 2VIEW: SUPPLIERS -->
-  <div id="view-suppliers" class="view-section" style="display: none;">
-    <section class="content-grid">
-      <aside class="panel">
-        <div class="card-head"><h3>Suppliers List</h3></div>
-        <div class="list" id="supplierList"></div>
-      </aside>
+  <script src="script.js?v=3"></script>
 
-      <!-- NEW Supplier Form -->
-      <aside class="panel">
-        <div class="card-head"><h3>Add Supplier</h3></div>
-        <form class="form" id="supplierForm">
-          <div class="field">
-            <label>Supplier Name</label>
-            <input id="supplier_name" required placeholder="Tech Supplies Inc" />
-          </div>
-          <div class="field">
-            <label>Phone</label>
-            <input id="supplier_phone" required placeholder="9876543210" />
-          </div>
-          <div class="field">
-            <label>Address</label>
-            <input id="supplier_address" required placeholder="Jaipur, Rajasthan" />
-          </div>
-          <button class="btn btn-primary" type="submit" style="margin-top: 1rem;">Save Supplier</button>
-        </form>
-      </aside>
-    </section>
-  </div>
+  <script>
+    // ===================== AUTH LOGIC =====================
 
-  <!-- VIEW TRANSACTIONS -->
-<div id="view-transactions" class="view-section" style="display: none;">
-  <section class="content-grid">
-    <aside class="panel">
-      <div class="card-head">
-        <h3>Add transaction</h3>
-        <p class="muted">Record stock in, out, or return.</p>
-      </div>
+    const loginScreen = document.getElementById('loginScreen');
+    const appDashboard = document.getElementById('appDashboard');
+    const authForm = document.getElementById('authForm');
+    const authTitle = document.getElementById('authTitle');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const authSwitchBtn = document.getElementById('authSwitchBtn');
+    const authSwitchText = document.getElementById('authSwitchText');
+    const authMessage = document.getElementById('authMessage');
+    const signupNameField = document.getElementById('signupNameField');
+    const signupRoleField = document.getElementById('signupRoleField');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-      <form class="form" id="transactionForm">
-        <div class="field">
-          <label for="transactionProductId">Product ID</label>
-          <input id="transactionProductId" type="number" required placeholder="1" />
-        </div>
+    let isLoginMode = true;
 
-        <div class="field">
-          <label for="transactionUserId">User ID</label>
-          <input id="transactionUserId" type="number" required placeholder="1" />
-        </div>
+    // Toggle between Login and Signup
+    authSwitchBtn.addEventListener('click', () => {
+      isLoginMode = !isLoginMode;
+      if (isLoginMode) {
+        authTitle.textContent = 'Login to StockFlow';
+        authSubmitBtn.textContent = 'Login';
+        authSwitchText.textContent = "Don't have an account?";
+        authSwitchBtn.textContent = 'Sign up';
+        signupNameField.style.display = 'none';
+        signupRoleField.style.display = 'none';
+      } else {
+        authTitle.textContent = 'Create New Account';
+        authSubmitBtn.textContent = 'Sign Up';
+        authSwitchText.textContent = 'Already have an account?';
+        authSwitchBtn.textContent = 'Login';
+        signupNameField.style.display = 'block';
+        signupRoleField.style.display = 'block';
+      }
+      authMessage.style.display = 'none';
+    });
 
-        <div class="field">
-          <label for="transactionType">Transaction Type</label>
-          <select id="transactionType" required>
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-            <option value="RETURN">RETURN</option>
-          </select>
-        </div>
+    // Show auth message
+    function showAuthMsg(msg, isError = true) {
+      authMessage.textContent = msg;
+      authMessage.style.display = 'block';
+      authMessage.style.color = isError ? 'var(--color-danger, #e53e3e)' : 'var(--color-success, #38a169)';
+    }
 
-        <div class="field">
-          <label for="transactionQuantity">Quantity</label>
-          <input id="transactionQuantity" type="number" min="1" required placeholder="5" />
-        </div>
+    // Auth headers helper — used throughout script.js too via window
+    window.authHeaders = function() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      };
+    };
 
-        <button class="btn btn-primary" type="submit">Save transaction</button>
-      </form>
-    </aside>
+    // Show dashboard after login
+    function showDashboard(user) {
+      loginScreen.style.display = 'none';
+      appDashboard.style.display = '';
 
-    <article class="panel">
-      <div class="card-head">
-        <h3>Transaction history</h3>
-        <p class="muted">Latest inventory movements</p>
-      </div>
+      // Set user info in header
+      const initials = user.name
+        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        : '?';
+      document.getElementById('userInitials').textContent = initials;
+      document.getElementById('activeUserLabel').textContent = user.name || 'User';
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Product</th>
-              <th>User</th>
-              <th>Type</th>
-              <th>Quantity</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="transactionTableBody">
-            <tr>
-              <td colspan="6" class="empty-cell">No transactions found.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </article>
-  </section>
-</div>
+      // Auto-fill user ID in transaction form
+      document.getElementById('transactionUserId').value = user.id;
 
-<!-- VIEW REPORTS -->
-<div id="view-reports" class="view-section" style="display: none;">
-  <section class="content-grid">
-    <article class="panel">
-      <div class="card-head">
-        <h3>Summary report</h3>
-        <p class="muted">Live numbers from products, suppliers, and transactions</p>
-      </div>
+      // If Staff, hide add/edit/delete UI (role-based access)
+      if (user.role === 'Staff') {
+        document.querySelectorAll('#productForm, #supplierForm, #transactionForm').forEach(f => {
+          const btn = f.querySelector('button[type="submit"]');
+          if (btn) btn.style.opacity = '0.4';
+          // You can fully hide forms for staff if preferred
+        });
+      }
+    }
 
-      <div class="metrics">
-        <article class="panel metric-card">
-          <div class="label">Total products</div>
-          <div class="value" id="reportTotalProducts">0</div>
-        </article>
+    // On page load — check token
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('sf_token');
+      const user = JSON.parse(localStorage.getItem('sf_user') || 'null');
+      if (token && user) {
+        showDashboard(user);
+      }
+      // loginScreen stays visible if not logged in
+    });
 
-        <article class="panel metric-card">
-          <div class="label">Total suppliers</div>
-          <div class="value" id="reportTotalSuppliers">0</div>
-        </article>
+    // Handle Login / Signup submit
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      authMessage.style.display = 'none';
+      authSubmitBtn.disabled = true;
+      authSubmitBtn.textContent = isLoginMode ? 'Logging in...' : 'Creating account...';
 
-        <article class="panel metric-card">
-          <div class="label">Total transactions</div>
-          <div class="value" id="reportTotalTransactions">0</div>
-        </article>
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
 
-        <article class="panel metric-card">
-          <div class="label">Inventory value</div>
-          <div class="value" id="reportInventoryValue">₹0</div>
-        </article>
-      </div>
-    </article>
+      try {
+        if (isLoginMode) {
+          // LOGIN
+          const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await res.json();
 
-    <article class="panel">
-      <div class="card-head">
-        <h3>Low stock report</h3>
-        <p class="muted">Products at or below reorder level</p>
-      </div>
+          if (data.success) {
+            localStorage.setItem('sf_token', data.token);
+            localStorage.setItem('sf_user', JSON.stringify(data.user));
+            showDashboard(data.user);
+            if (typeof window.onLoginSuccess === 'function') window.onLoginSuccess(data.user);
+          } else {
+            showAuthMsg(data.message || 'Invalid credentials');
+          }
+        } else {
+          // SIGNUP
+          const name = document.getElementById('authName').value.trim();
+          const role = document.getElementById('authRole').value;
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Product</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Reorder Level</th>
-            </tr>
-          </thead>
-          <tbody id="reportLowStockBody">
-            <tr>
-              <td colspan="5" class="empty-cell">No low stock items.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </article>
-  </section>
-</div>
+          const res = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, role })
+          });
+          const data = await res.json();
 
-</main>
-  </div>
+          if (data.success) {
+            showAuthMsg('Account created! Please log in.', false);
+            // Switch to login mode
+            setTimeout(() => {
+              authSwitchBtn.click();
+              document.getElementById('authEmail').value = email;
+            }, 1000);
+          } else {
+            showAuthMsg(data.message || 'Signup failed');
+          }
+        }
+      } catch (err) {
+        showAuthMsg('Network error. Please try again.');
+      } finally {
+        authSubmitBtn.disabled = false;
+        authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
+      }
+    });
 
-  <!-- <script src="script.js"></script> -->
-<!-- Change this line at the bottom of index.html -->
-<script src="script.js?v=2"></script>
+    // LOGOUT
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('sf_token');
+      localStorage.removeItem('sf_user');
+      appDashboard.style.display = 'none';
+      loginScreen.style.display = 'flex';
+      document.getElementById('authEmail').value = '';
+      document.getElementById('authPassword').value = '';
+      authMessage.style.display = 'none';
+      isLoginMode = true;
+      authTitle.textContent = 'Login to StockFlow';
+      authSubmitBtn.textContent = 'Login';
+      authSwitchText.textContent = "Don't have an account?";
+      authSwitchBtn.textContent = 'Sign up';
+      signupNameField.style.display = 'none';
+      signupRoleField.style.display = 'none';
+    });
+
+    // ===================== DELETE CONFIRMATION MODAL =====================
+    window.showDeleteConfirm = function(title, message, onConfirm) {
+      const modal = document.getElementById('deleteModal');
+      document.getElementById('deleteModalTitle').textContent = title;
+      document.getElementById('deleteModalMsg').textContent = message;
+      modal.style.display = 'flex';
+
+      const confirmBtn = document.getElementById('deleteConfirmBtn');
+      const cancelBtn = document.getElementById('deleteCancelBtn');
+
+      const cleanup = () => { modal.style.display = 'none'; };
+
+      confirmBtn.onclick = () => { cleanup(); onConfirm(); };
+      cancelBtn.onclick = cleanup;
+    };
+  </script>
 </body>
 </html>
