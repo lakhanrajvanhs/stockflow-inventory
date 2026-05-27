@@ -1,7 +1,8 @@
-
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
 const db = require("./config/db");
@@ -13,95 +14,103 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Login
+// ─── Auth Middleware ───────────────────────────────────────────────────────────
+// MUST be defined BEFORE the protected routes below
+function authMiddleware(req, res, next) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid or expired token" });
+  }
+}
+
+// ─── Public Routes (no token needed) ──────────────────────────────────────────
+
+// LOGIN
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
-  const query = "SELECT * FROM users WHERE email = ? AND password = ?";
 
-  db.query(query, [email, password], (err, results) => {
+  if (!email || !password)
+    return res.status(400).json({ success: false, message: "Email and password are required" });
+
+  const query = "SELECT * FROM users WHERE email = ?";
+
+  db.query(query, [email], async (err, results) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ error: "Database error" });
+      return res.status(500).json({ success: false, message: "Database error" });
     }
+    if (results.length === 0)
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
 
-    if (results.length > 0) {
-      return res.json({
-        success: true,
-        user: {
-          id: results[0].user_id,
-          name: results[0].name,
-          role: results[0].role
-        }
-      });
-    }
+    const user = results[0];
 
-    return res.status(401).json({
-      success: false,
-      message: "Invalid email or password"
+    // Compare hashed password
+    const match = await bcrypt.compare(password, user.password);
+    if (!match)
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+
+    // Sign JWT
+    const token = jwt.sign(
+      { id: user.user_id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id:   user.user_id,
+        name: user.name,
+        role: user.role
+      }
     });
   });
 });
 
+// SIGNUP
 app.post("/api/signup", (req, res) => {
   const { name, email, password, role } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Name, email and password are required"
-    });
-  }
+  if (!name || !email || !password)
+    return res.status(400).json({ success: false, message: "Name, email, and password are required" });
 
-  const checkUserQuery = "SELECT * FROM users WHERE email = ?";
+  const checkQuery = "SELECT * FROM users WHERE email = ?";
 
-  db.query(checkUserQuery, [email], (checkErr, checkResults) => {
-    if (checkErr) {
-      console.error(checkErr);
-      return res.status(500).json({
-        success: false,
-        message: "Database error"
-      });
+  db.query(checkQuery, [email], async (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: "Database error" });
     }
+    if (results.length > 0)
+      return res.status(409).json({ success: false, message: "Email already exists" });
 
-    if (checkResults.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: "Email already exists"
-      });
-    }
+    // Hash password before storing
+    const hashed = await bcrypt.hash(password, 10);
 
-    const insertUserQuery = `
-      INSERT INTO users (name, email, password, role)
-      VALUES (?, ?, ?, ?)
-    `;
+    const insertQuery = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
 
-    db.query(
-      insertUserQuery,
-      [name, email, password, role || "Staff"],
-      (insertErr) => {
-        if (insertErr) {
-          console.error(insertErr);
-          return res.status(500).json({
-            success: false,
-            message: "Failed to create account"
-          });
-        }
-
-        return res.json({
-          success: true,
-          message: "Account created successfully"
-        });
+    db.query(insertQuery, [name, email, hashed, role || "Staff"], (err2) => {
+      if (err2) {
+        console.error(err2);
+        return res.status(500).json({ success: false, message: "Failed to create account" });
       }
-    );
+      res.json({ success: true, message: "Account created successfully" });
+    });
   });
 });
 
-// Existing routes
-app.use("/api/products", productRoutes);
-app.use("/api/suppliers", supplierRoutes);
+// ─── Protected Routes (token required) ────────────────────────────────────────
+app.use("/api/products",  authMiddleware, productRoutes);
+app.use("/api/suppliers", authMiddleware, supplierRoutes);
 
-// Transactions list
-app.get("/api/transactions", (req, res) => {
+// GET all transactions
+app.get("/api/transactions", authMiddleware, (req, res) => {
   const query = `
     SELECT 
       t.transaction_id,
@@ -127,29 +136,26 @@ app.get("/api/transactions", (req, res) => {
   });
 });
 
-// Add transaction
-app.post("/api/transactions", (req, res) => {
+// POST add transaction
+app.post("/api/transactions", authMiddleware, (req, res) => {
   const { product_id, user_id, transaction_type, quantity } = req.body;
 
-  if (!product_id || !user_id || !transaction_type || !quantity) {
+  if (!product_id || !user_id || !transaction_type || !quantity)
     return res.status(400).json({ error: "All fields are required" });
-  }
 
   const qty = Number(quantity);
-  if (qty <= 0) {
+  if (qty <= 0)
     return res.status(400).json({ error: "Quantity must be greater than 0" });
-  }
 
   const getProductQuery = "SELECT * FROM products WHERE product_id = ?";
+
   db.query(getProductQuery, [product_id], (err, productResults) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: "Database error" });
     }
-
-    if (productResults.length === 0) {
+    if (productResults.length === 0)
       return res.status(404).json({ error: "Product not found" });
-    }
 
     const product = productResults[0];
     let newQuantity = Number(product.quantity);
@@ -157,50 +163,39 @@ app.post("/api/transactions", (req, res) => {
     if (transaction_type === "IN" || transaction_type === "RETURN") {
       newQuantity += qty;
     } else if (transaction_type === "OUT") {
-      if (newQuantity < qty) {
+      if (newQuantity < qty)
         return res.status(400).json({ error: "Not enough stock available" });
-      }
       newQuantity -= qty;
     } else {
       return res.status(400).json({ error: "Invalid transaction type" });
     }
 
-    const insertTransactionQuery = `
+    const insertQuery = `
       INSERT INTO transactions (product_id, user_id, transaction_type, quantity)
       VALUES (?, ?, ?, ?)
     `;
 
-    db.query(
-      insertTransactionQuery,
-      [product_id, user_id, transaction_type, qty],
-      (insertErr) => {
-        if (insertErr) {
-          console.error(insertErr);
-          return res.status(500).json({ error: "Failed to save transaction" });
-        }
-
-        const updateProductQuery =
-          "UPDATE products SET quantity = ? WHERE product_id = ?";
-
-        db.query(
-          updateProductQuery,
-          [newQuantity, product_id],
-          (updateErr) => {
-            if (updateErr) {
-              console.error(updateErr);
-              return res.status(500).json({ error: "Failed to update stock" });
-            }
-
-            return res.json({ message: "Transaction saved successfully" });
-          }
-        );
+    db.query(insertQuery, [product_id, user_id, transaction_type, qty], (insertErr) => {
+      if (insertErr) {
+        console.error(insertErr);
+        return res.status(500).json({ error: "Failed to save transaction" });
       }
-    );
+
+      const updateQuery = "UPDATE products SET quantity = ? WHERE product_id = ?";
+
+      db.query(updateQuery, [newQuantity, product_id], (updateErr) => {
+        if (updateErr) {
+          console.error(updateErr);
+          return res.status(500).json({ error: "Failed to update stock" });
+        }
+        res.json({ message: "Transaction saved successfully" });
+      });
+    });
   });
 });
 
-// Reports summary
-app.get("/api/reports/summary", (req, res) => {
+// GET reports summary
+app.get("/api/reports/summary", authMiddleware, (req, res) => {
   const summaryQuery = `
     SELECT 
       (SELECT COUNT(*) FROM products) AS total_products,
@@ -230,22 +225,22 @@ app.get("/api/reports/summary", (req, res) => {
       }
 
       res.json({
-        summary: summaryResults[0],
+        summary:  summaryResults[0],
         lowStock: lowStockResults
       });
     });
   });
 });
 
-// Serve frontend
+// ─── Serve Frontend ────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend", "index.html"));
 });
 
+// ─── Start Server ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
