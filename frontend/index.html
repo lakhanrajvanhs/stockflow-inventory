@@ -378,5 +378,68 @@
 
   <script src="script.js?v=3"></script>
 
+  <!-- Edit Product Modal -->
+<div id="editProductModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-card,#fff);padding:2rem;border-radius:12px;width:90%;max-width:440px;">
+    <h3 style="margin-bottom:1.2rem;">Edit Product</h3>
+    <form id="editProductForm">
+      <input type="hidden" id="editProductId">
+      <div style="margin-bottom:.8rem;">
+        <label>Product Name</label><br>
+        <input id="editProductName" type="text" required style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="margin-bottom:.8rem;">
+        <label>Category</label><br>
+        <input id="editCategory" type="text" style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="margin-bottom:.8rem;">
+        <label>Quantity</label><br>
+        <input id="editQuantity" type="number" required style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="margin-bottom:.8rem;">
+        <label>Price</label><br>
+        <input id="editPrice" type="number" step="0.01" required style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="margin-bottom:.8rem;">
+        <label>Reorder Level</label><br>
+        <input id="editReorderLevel" type="number" style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="margin-bottom:1.2rem;">
+        <label>Supplier ID</label><br>
+        <input id="editSupplierId" type="number" style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="display:flex;gap:.8rem;justify-content:flex-end;">
+        <button type="button" onclick="closeEditProduct()" style="padding:.5rem 1.2rem;">Cancel</button>
+        <button type="submit" style="padding:.5rem 1.2rem;background:#3182ce;color:#fff;border:none;border-radius:6px;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- Edit Supplier Modal -->
+<div id="editSupplierModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-card,#fff);padding:2rem;border-radius:12px;width:90%;max-width:440px;">
+    <h3 style="margin-bottom:1.2rem;">Edit Supplier</h3>
+    <form id="editSupplierForm">
+      <input type="hidden" id="editSuppId">
+      <div style="margin-bottom:.8rem;">
+        <label>Supplier Name</label><br>
+        <input id="editSupplierName" type="text" required style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="margin-bottom:.8rem;">
+        <label>Phone</label><br>
+        <input id="editSupplierPhone" type="text" style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="margin-bottom:1.2rem;">
+        <label>Address</label><br>
+        <input id="editSupplierAddress" type="text" style="width:100%;padding:.5rem;margin-top:.3rem;">
+      </div>
+      <div style="display:flex;gap:.8rem;justify-content:flex-end;">
+        <button type="button" onclick="closeEditSupplier()" style="padding:.5rem 1.2rem;">Cancel</button>
+        <button type="submit" style="padding:.5rem 1.2rem;background:#3182ce;color:#fff;border:none;border-radius:6px;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>
