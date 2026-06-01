@@ -501,7 +501,7 @@ async function deleteSupplier(supplierId, supplierName) {
 
 // ─── Edit Product Modal ────────────────────────────────────────────────────────
 function openEditProduct(productId) {
-  // const product = allProducts.find(p => p.product_id === productId);
+  // 
   const product = allProducts.find(p => String(p.product_id) === String(productId));
   if (!product) return;
 
@@ -549,7 +549,7 @@ if (editProductForm) {
 
 // ─── Edit Supplier Modal ───────────────────────────────────────────────────────
 function openEditSupplier(supplierId) {
-  // const supplier = allSuppliers.find(s => s.supplier_id === supplierId);
+  //
   const supplier = allSuppliers.find(s => String(s.supplier_id) === String(supplierId));
   if (!supplier) return;
 
