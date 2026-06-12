@@ -275,7 +275,7 @@ app.post('/api/forgot-password', (req, res) => {
         async (updateErr) => {
           if (updateErr) return res.status(500).json({ error: 'Failed to generate token' });
 
-          const resetLink = `http://localhost:5001/reset-password.html?token=${resetToken}`;
+          const resetLink = `https://stockflow-inventory-araa.onrender.com/reset-password.html?token=${resetToken}`;
 
           const mailOptions = {
             from: '"StockFlow Support" <noreply@stockflow.com>',
