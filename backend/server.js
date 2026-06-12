@@ -269,7 +269,7 @@ app.post('/api/forgot-password', (req, res) => {
 
           // ⬇️ NEW BREVO API LOGIC ⬇️
           const emailPayload = {
-            sender: { name: "StockFlow Support", email: "noreply@stockflow.com" },
+            sender: { name: "StockFlow Support", email: "lakhanrajvansh@gmail.com" },
             to: [{ email: user.email }],
             subject: "Password Reset Request",
             htmlContent: `
