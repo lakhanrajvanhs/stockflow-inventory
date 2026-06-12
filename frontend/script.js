@@ -696,6 +696,7 @@ function setAuthMode(mode) {
     if (authSwitchBtn)  authSwitchBtn.textContent  = 'Sign up';
     if (signupNameField) signupNameField.style.display = 'none';
     if (signupRoleField) signupRoleField.style.display = 'none';
+    if (forgotPwdContainer) forgotPwdContainer.style.display = 'block';
   } else {
     if (authTitle)      authTitle.textContent      = 'Create New Account';
     if (authSubmitBtn)  authSubmitBtn.textContent  = 'Sign Up';
@@ -703,6 +704,7 @@ function setAuthMode(mode) {
     if (authSwitchBtn)  authSwitchBtn.textContent  = 'Login';
     if (signupNameField) signupNameField.style.display = 'block';
     if (signupRoleField) signupRoleField.style.display = 'block';
+    if (forgotPwdContainer) forgotPwdContainer.style.display = 'none';
   }
 }
 
@@ -800,4 +802,63 @@ if (savedToken && savedUser) {
 } else {
   if (loginScreen)  loginScreen.style.display  = 'flex';
   if (appDashboard) appDashboard.style.display = 'none';
+}
+
+// ─── Forgot Password Logic ─────────────────────────────────────────────────────
+const forgotPwdContainer = document.getElementById('forgotPwdContainer');
+const forgotPwdLink      = document.getElementById('forgotPwdLink');
+const forgotPwdModal     = document.getElementById('forgotPwdModal');
+const closeForgotPwdBtn  = document.getElementById('closeForgotPwdBtn');
+const forgotPwdForm      = document.getElementById('forgotPwdForm');
+const resetEmail         = document.getElementById('resetEmail');
+const sendResetBtn       = document.getElementById('sendResetBtn');
+
+// Show modal
+if (forgotPwdLink) {
+  forgotPwdLink.addEventListener('click', () => {
+    forgotPwdModal.style.display = 'flex';
+  });
+}
+
+// Close modal
+if (closeForgotPwdBtn) {
+  closeForgotPwdBtn.addEventListener('click', () => {
+    forgotPwdModal.style.display = 'none';
+    forgotPwdForm.reset();
+  });
+}
+
+// Handle Form Submission
+if (forgotPwdForm) {
+  forgotPwdForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Update UI to show loading state
+    sendResetBtn.disabled = true;
+    sendResetBtn.textContent = 'Sending...';
+
+    try {
+      const res = await fetch('/api/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail.value.trim() })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        showToast(data.message || 'Password reset link sent to your email.');
+        forgotPwdModal.style.display = 'none';
+        forgotPwdForm.reset();
+      } else {
+        showToast(data.error || 'Failed to send reset link.', 'error');
+      }
+    } catch (err) {
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      // Restore button state
+      sendResetBtn.disabled = false;
+      sendResetBtn.textContent = 'Send Link';
+    }
+  });
 }

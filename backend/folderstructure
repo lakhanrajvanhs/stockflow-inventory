@@ -1,6 +1,6 @@
 Inventory-management-system
 ├─backend
-  ├──schema.sql
+│ ├──schema.sql
 │ ├── .env
 │ ├── .gitignore
 │ ├── package.json
