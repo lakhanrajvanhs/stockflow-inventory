@@ -7,16 +7,6 @@ const crypto = require('crypto');           // <-- ADD THIS
 const nodemailer = require('nodemailer');
 require("dotenv").config();
 
-// ─── Email Setup ───────────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: true, // Use SSL for Render
-  auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASS
-  }
-});
 
 const db = require("./config/db");
 const productRoutes = require("./routes/productRoutes");
@@ -277,11 +267,12 @@ app.post('/api/forgot-password', (req, res) => {
 
           const resetLink = `https://stockflow-inventory-araa.onrender.com/reset-password.html?token=${resetToken}`;
 
-          const mailOptions = {
-            from: '"StockFlow Support" <noreply@stockflow.com>',
-            to: user.email,
-            subject: 'Password Reset Request',
-            html: `
+          // ⬇️ NEW BREVO API LOGIC ⬇️
+          const emailPayload = {
+            sender: { name: "StockFlow Support", email: "noreply@stockflow.com" },
+            to: [{ email: user.email }],
+            subject: "Password Reset Request",
+            htmlContent: `
               <h2>Password Reset</h2>
               <p>You requested a password reset for your StockFlow account.</p>
               <p>Click the link below to set a new password. This link is valid for 1 hour.</p>
@@ -291,12 +282,26 @@ app.post('/api/forgot-password', (req, res) => {
           };
 
           try {
-            await transporter.sendMail(mailOptions);
+            const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+              method: 'POST',
+              headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+              },
+              body: JSON.stringify(emailPayload)
+            });
+
+            if (!emailRes.ok) {
+              throw new Error("API rejected the email request");
+            }
+
             res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
           } catch (emailError) {
-            console.error("Nodemailer failed to send email:", emailError);
+            console.error("Brevo failed to send email:", emailError);
             res.status(500).json({ error: 'Failed to send the email. Check your server terminal.' });
           }
+          // ⬆️ END OF NEW BREVO LOGIC ⬆️
         }
       );
     });

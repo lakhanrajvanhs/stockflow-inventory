@@ -2,7 +2,7 @@
 node_modules/
 
 # Environment variables (Crucial for security)
-.env
+/.env
 
 # Optional: Ignore Mac system files if you use a Mac
 .DS_Store
