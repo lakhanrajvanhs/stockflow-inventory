@@ -288,8 +288,13 @@ app.post('/api/forgot-password', (req, res) => {
             `
           };
 
-          await transporter.sendMail(mailOptions);
-          res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+          try {
+            await transporter.sendMail(mailOptions);
+            res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+          } catch (emailError) {
+            console.error("Nodemailer failed to send email:", emailError);
+            res.status(500).json({ error: 'Failed to send the email. Check your server terminal.' });
+          }
         }
       );
     });
