@@ -65,14 +65,29 @@
         Login
       </button>
 
-      <div id="forgotPwdContainer" style="text-align: right; margin-top: 0.5rem;">
-      <button
+      <div id="forgotPwdContainer" style="
+          margin-top: 1rem; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          gap: 5px; 
+          font-size: 0.85rem;
+      ">
+        <span style="color: var(--color-text-muted);">Having trouble?</span>
+        <button
           type="button"
           id="forgotPwdLink"
-          style="background: none; border: none; color: var(--color-primary); cursor: pointer; font-size: 0.85rem;"
-       >
-      Forgot password?
-      </button>
+          style="
+          background: none; 
+          border: none; 
+          color: var(--color-primary); 
+          cursor: pointer; 
+          font-size: 0.85rem; 
+          text-decoration: underline;
+          "
+        >
+        Forgot password?
+        </button>
       </div>
 
       <p style="margin-top: 1rem; text-align: center;">
