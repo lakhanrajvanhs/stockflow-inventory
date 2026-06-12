@@ -7,6 +7,15 @@ const crypto = require('crypto');           // <-- ADD THIS
 const nodemailer = require('nodemailer');
 require("dotenv").config();
 
+// ─── Email Setup ───────────────────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS
+  }
+});
+
 const db = require("./config/db");
 const productRoutes = require("./routes/productRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
@@ -324,120 +333,6 @@ app.post('/api/reset-password', (req, res) => {
     res.status(500).json({ error: 'An error occurred while resetting your password.' });
   }
 });
-
-// // Configure your email transporter (Replace with your actual SMTP credentials)
-// const transporter = nodemailer.createTransport({
-//   host: 'smtp.your-email-provider.com',
-//   port: 587,
-//   secure: false, // true for 465, false for other ports
-//   auth: {
-//     user: process.env.EMAIL_USER, 
-//     pass: process.env.EMAIL_PASS
-//   }
-// });
-
-// app.post('/api/forgot-password', async (req, res) => {
-//   const { email } = req.body;
-
-//   if (!email) {
-//     return res.status(400).json({ error: 'Email is required' });
-//   }
-
-//   try {
-//     // STEP 1: Check if the user's email exists in the MySQL database
-//     const [users] = await db.query('SELECT user_id, email FROM users WHERE email = ?', [email]);
-    
-//     if (users.length === 0) {
-//       // Security best practice: Don't reveal if the email exists or not to prevent enumeration attacks.
-//       // Always return a success message here even if the email isn't found.
-//       return res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
-//     }
-
-//     const user = users[0];
-
-//     // STEP 2: Generate a secure, time-sensitive reset token
-//     // crypto.randomBytes generates a cryptographically strong random string
-//     const resetToken = crypto.randomBytes(32).toString('hex');
-    
-//     // Set expiration time (e.g., 1 hour from now)
-//     const expireTime = new Date(Date.now() + 3600000); 
-
-//     // STEP 3: Store that token in the database alongside the user's ID and an expiration timestamp
-//     await db.query(
-//       'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE user_id = ?',
-//       [resetToken, expireTime, user.user_id]
-//     );
-
-//     // STEP 4: Send an email to the user containing the link
-//     // Note: In production, use your actual domain environment variable
-//     const resetLink = `https://yourdomain.com/reset-password?token=${resetToken}`;
-
-//     const mailOptions = {
-//       from: '"StockFlow Support" <noreply@stockflow.com>',
-//       to: user.email,
-//       subject: 'Password Reset Request',
-//       html: `
-//         <h2>Password Reset</h2>
-//         <p>You requested a password reset for your StockFlow account.</p>
-//         <p>Click the link below to set a new password. This link is valid for 1 hour.</p>
-//         <a href="${resetLink}" style="padding: 10px 15px; background: #01696f; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
-//         <p>If you did not request this, please ignore this email.</p>
-//       `
-//     };
-
-//     await transporter.sendMail(mailOptions);
-
-//     res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
-
-//   } catch (error) {
-//     console.error('Forgot password error:', error);
-//     res.status(500).json({ error: 'An error occurred while processing your request.' });
-//   }
-// });
-
-//  //
-
-// // ==========================================
-// // PASTE THIS BELOW YOUR FORGOT PASSWORD ROUTE
-// // ==========================================
-// app.post('/api/reset-password', async (req, res) => {
-//   const { token, newPassword } = req.body;
-
-//   if (!token || !newPassword) {
-//     return res.status(400).json({ error: 'Token and new password are required.' });
-//   }
-
-//   try {
-//     // 1. Find the user with this token, ensuring it hasn't expired
-//     // The > NOW() checks that the expiry time is in the future
-//     const [users] = await db.query(
-//       'SELECT user_id FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()',
-//       [token]
-//     );
-
-//     if (users.length === 0) {
-//       return res.status(400).json({ error: 'Invalid or expired reset link. Please request a new one.' });
-//     }
-
-//     const userId = users[0].user_id;
-
-//     // 2. Hash the new password
-//     const saltRounds = 10;
-//     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-//     // 3. Update the password and clear out the token fields so they can't be reused
-//     await db.query(
-//       'UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE user_id = ?',
-//       [hashedPassword, userId]
-//     );
-
-//     res.json({ success: true, message: 'Password has been successfully reset.' });
-
-//   } catch (error) {
-//     console.error('Reset password error:', error);
-//     res.status(500).json({ error: 'An error occurred while resetting your password.' });
-//   }
-// });
 
 // ─── Serve Frontend ────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, "../frontend")));
